@@ -44,7 +44,7 @@ export const site = {
 
   /** Used for <meta name="description"> when a page does not set its own. */
   description:
-    'Portfolio of Dennis Ezekiel Vidar. I develop software.',
+    'Dennis Ezekiel Vidar (chyken): Android and Minecraft mod developer, UPLB sophomore and founder of cinnabyte. Open to freelance from Oct 2026.',
 } as const;
 
 export type Site = typeof site;

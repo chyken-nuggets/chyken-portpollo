@@ -17,7 +17,7 @@ const all = await getProjects();
 const featured = await getFeatured(4);
 ---
 
-<BaseLayout description={`${site.name}: ${site.role}. ${site.bio.replace(/\n/g, ' ')}`}>
+<BaseLayout description={`${site.description} ${site.role}.`}>
   <!-- 01 / The blue screen: calm, sparse, typed. -->
   <Section class="boot" aria-labelledby="boot-title">
     <TypedText

@@ -1,18 +1,19 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 
-// Deploying to GitHub Pages under a project repo (username.github.io/repo)?
-// Set SITE_URL and BASE_PATH in the workflow, or edit the fallbacks below.
+// The live site is chyken.dev on Cloudflare Workers. To build for another
+// domain or a sub-path, set SITE_URL and BASE_PATH instead of editing these.
 // Every internal link goes through src/lib/url.ts, so `base` just works.
-const site = process.env.SITE_URL ?? 'https://example.com';
+const site = process.env.SITE_URL ?? 'https://chyken.dev';
 const base = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({
   site,
   base,
   output: 'static',
-  integrations: [mdx()],
+  integrations: [mdx(), sitemap()],
   image: {
     service: {
       entrypoint: 'astro/assets/services/sharp',

@@ -67,11 +67,11 @@ npm run dev        # http://localhost:4321  (runs the halftone script first)
 │   │   ├── work/[id].astro   project page
 │   │   ├── about.astro
 │   │   ├── contact.astro
+│   │   ├── robots.txt.ts     robots.txt pointing at the sitemap
 │   │   └── 404.astro         blue-screen error
 │   └── styles/
 │       ├── tokens.css        colour, type, spacing tokens
 │       └── global.css        reset, surfaces, links, prose
-├── .github/workflows/deploy.yml   GitHub Pages deploy
 └── references/               mood images (git-ignored, never imported)
 ```
 
@@ -327,25 +327,11 @@ npm run check     # type-check .astro/.ts files
 
 The output is a static `dist/` folder. `npm run build` regenerates the halftones first, so the generated images don't need to be committed.
 
-### Netlify
+### Cloudflare Workers
 
-New site from Git. Build command `npm run build`, publish directory `dist`. Netlify reads `.nvmrc` for the Node version.
+The live site, [chyken.dev](https://chyken.dev), is served by Cloudflare Workers. Build command `npm run build`, static assets directory `dist`.
 
-### Vercel
-
-Import the repo. Vercel detects Astro automatically (build `npm run build`, output `dist`). Set the Node version to 22+ in *Project Settings → General* if it isn't already.
-
-### GitHub Pages
-
-A workflow is included at `.github/workflows/deploy.yml`.
-
-1. Push the repo to GitHub.
-2. Go to *Settings → Pages → Source*, and choose **GitHub Actions**.
-3. Push to `main`.
-
-The workflow sets `SITE_URL` and `BASE_PATH` for a project site (`https://<user>.github.io/<repo>/`). For a user site (a repo named `<user>.github.io`), change `BASE_PATH` to `/` in the workflow. Every internal link goes through `src/lib/url.ts`, so sub-paths work.
-
-For a custom domain, set `SITE_URL` to it, set `BASE_PATH` to `/`, and add a `public/CNAME` file containing the domain.
+`site` in `astro.config.mjs` defaults to `https://chyken.dev`, which sets the canonical URL, `og:url`, the sitemap and `robots.txt`. To build for another domain or a sub-path, set the `SITE_URL` and `BASE_PATH` environment variables instead of editing the defaults. Every internal link goes through `src/lib/url.ts`, so sub-paths work.
 
 ---
 

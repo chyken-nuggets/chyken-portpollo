@@ -38,6 +38,7 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
 
+    <link rel="sitemap" href={url('/sitemap-index.xml')} />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <meta name="theme-color" content="#0000ff" />
     <meta name="generator" content={Astro.generator} />
