@@ -1,0 +1,67 @@
+---
+/**
+ * The white-box display label: heavy, extra-wide caps in the paper colour on
+ * an ink-coloured box. On blue that's blue type in a white box; on white
+ * sections it flips to white type in a blue box automatically.
+ */
+import type { HTMLTag } from 'astro/types';
+
+interface Props {
+  as?: HTMLTag;
+  size?: 'xl' | 'l' | 'm' | 's';
+  class?: string;
+  id?: string;
+}
+
+const { as: Tag = 'span', size = 'm', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['label', `label--${size}`, className]} {...rest}><slot /></Tag>
+
+<style>
+  .label {
+    display: inline;
+    padding: 0.16em 0.32em 0.08em;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' 125;
+    line-height: 1.22;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    /* Each wrapped line gets its own box, like strips of label tape. */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    overflow-wrap: break-word;
+  }
+
+  .label--xl {
+    font-size: var(--fs-d1);
+  }
+
+  .label--l {
+    font-size: var(--fs-d2);
+  }
+
+  .label--m {
+    font-size: var(--fs-d3);
+  }
+
+  .label--s {
+    font-size: var(--fs-small);
+    padding: 0.3em 0.5em 0.22em;
+    letter-spacing: 0.02em;
+  }
+
+  /* Links inside a label invert against the label, not the page. */
+  .label :global(a:hover) {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .label :global(a:focus-visible) {
+    outline-color: var(--paper);
+  }
+</style>

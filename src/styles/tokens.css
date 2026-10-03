@@ -1,0 +1,54 @@
+/*
+ * Design tokens. Three colours, two typefaces, one spacing rhythm.
+ *
+ * Contrast: white on blue and blue on white are both ~8.6:1.
+ * Never set text in black on blue (~2.4:1). Black is for halftone darks and
+ * tiny details only.
+ */
+:root {
+  /* colour */
+  --blue: #0000ff;
+  --white: #ffffff;
+  --black: #000000;
+
+  /* contextual colour: every surface sets these (see .paper-blue / .paper-white) */
+  --paper: var(--blue);
+  --ink: var(--white);
+  --focus: var(--white);
+
+  /* type */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-display: 'Archivo Variable', 'Archivo', 'Arial Black', system-ui, sans-serif;
+
+  --fs-meta: 0.8125rem; /* 13px: metadata, captions */
+  --fs-small: 0.875rem; /* 14px: nav, secondary */
+  --fs-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem); /* 16 -> 18 */
+  --fs-lead: clamp(1.0625rem, 1rem + 0.45vw, 1.375rem); /* 17 -> 22 */
+  --fs-d3: clamp(1.125rem, 1rem + 0.7vw, 1.5rem); /* 18 -> 24: card titles */
+  --fs-d2: clamp(1.625rem, 1.1rem + 2.4vw, 3rem); /* 26 -> 48: section labels */
+  --fs-d1: clamp(2.25rem, 1rem + 5.6vw, 5.5rem); /* 36 -> 88: page titles */
+
+  --lh-mono: 1.6;
+  --lh-display: 0.95;
+  --track-mono: 0.02em;
+  --track-meta: 0.08em;
+
+  /* space: 8px rhythm */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 1rem;
+  --s-4: 1.5rem;
+  --s-5: 2.5rem;
+  --s-6: 4rem;
+  --s-7: 6rem;
+  --s-8: 10rem;
+
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+  --max: 90rem;
+  --measure: 64ch;
+
+  /* lines: always hard, never soft */
+  --rule: 2px;
+  --rule-thick: 4px;
+  --focus-width: 3px;
+}

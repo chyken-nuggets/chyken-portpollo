@@ -1,0 +1,167 @@
+---
+import Logo from './Logo.astro';
+import { site } from '../data/site';
+import { isCurrent, routeOf, url } from '../lib/url';
+
+const links = [
+  { href: '/work/', label: 'Work' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
+];
+
+const pathname = Astro.url.pathname;
+const route = routeOf(pathname);
+const isHome = route === '/';
+---
+
+<header class="site-header paper-blue">
+  <a class="brand" href={url('/')} aria-current={isHome ? 'page' : undefined}>
+    <span class="brand__mark"><Logo decorative /></span>
+    <span class="brand__name">{site.shortName}</span>
+    <span class="sr-only">, home</span>
+  </a>
+
+  <p class="path meta" aria-hidden="true">C:\DEV{route === '/' ? '' : route.toUpperCase().replaceAll('/', '\\')}&gt;</p>
+
+  <nav class="nav" aria-label="Main">
+    <ul role="list">
+      {
+        links.map(({ href, label }) => (
+          <li>
+            <a href={url(href)} aria-current={isCurrent(pathname, href) ? 'page' : undefined}>
+              {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    /* Lifts the header out of the page-change glitch (see global.css). */
+    view-transition-name: site-header;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    border-bottom: var(--rule) solid var(--ink);
+    font-size: var(--fs-small);
+    text-transform: uppercase;
+    letter-spacing: var(--track-meta);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--gutter);
+    padding-right: var(--s-3);
+    font-weight: 700;
+    border-right: var(--rule) solid var(--ink);
+  }
+
+  .brand__mark {
+    display: block;
+    width: 3.25rem;
+    flex: none;
+  }
+
+  /* The emblem inverts along with the link. */
+  .brand:hover .brand__mark,
+  .brand[aria-current='page'] .brand__mark {
+    --ink: var(--blue);
+    --paper: var(--white);
+  }
+
+  .brand[aria-current='page'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .path {
+    display: none;
+    align-self: center;
+    margin: 0 auto 0 var(--s-4);
+  }
+
+  .nav ul {
+    display: flex;
+    height: 100%;
+  }
+
+  .nav li {
+    display: flex;
+    border-left: var(--rule) solid var(--ink);
+  }
+
+  .nav li:first-child {
+    border-left: 0;
+  }
+
+  .nav a {
+    display: flex;
+    align-items: center;
+    padding: var(--s-2) var(--s-3);
+  }
+
+  .nav li:last-child a {
+    padding-right: var(--gutter);
+  }
+
+  .nav a[aria-current='page'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Focus rings sit inside the bar so they are never clipped. */
+  .site-header a:focus-visible {
+    outline-offset: -6px;
+  }
+
+  .nav a[aria-current='page']:focus-visible,
+  .brand[aria-current='page']:focus-visible,
+  .site-header a:hover:focus-visible {
+    outline-color: var(--paper);
+  }
+
+  @media (min-width: 56rem) {
+    .path {
+      display: block;
+    }
+
+    .nav {
+      border-left: var(--rule) solid var(--ink);
+    }
+
+    .nav a {
+      padding-inline: var(--s-4);
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .brand__name {
+      display: none;
+    }
+
+    .brand {
+      padding-right: var(--gutter);
+    }
+
+    .nav {
+      flex: 1;
+    }
+
+    .nav ul {
+      justify-content: flex-end;
+    }
+
+    .nav li:first-child {
+      border-left: 0;
+    }
+
+    .nav a {
+      padding-inline: var(--s-3);
+    }
+  }
+</style>

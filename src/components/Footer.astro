@@ -1,0 +1,63 @@
+---
+import Cursor from './Cursor.astro';
+import { site } from '../data/site';
+
+const built = new Date();
+const year = built.getFullYear();
+const updated = built.toISOString().slice(0, 10); // build date, e.g. 2026-10-03
+---
+
+<footer class="site-footer paper-blue">
+  <div class="site-footer__row">
+    <p>&copy; {year} {site.name}</p>
+    <ul class="site-footer__links" role="list">
+      <li><a href={`mailto:${site.email}`}>Email</a></li>
+      {
+        site.socials.map((s) => (
+          <li>
+            <a href={s.url} rel="me noopener">
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p><a href="#top" class="site-footer__top">Back to top</a></p>
+  </div>
+  <p class="site-footer__eot meta">
+    Last updated <time datetime={updated}>{updated}</time> / End of transmission<Cursor blink={false} />
+  </p>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: var(--rule) solid var(--ink);
+    font-size: var(--fs-small);
+  }
+
+  .site-footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-2) var(--s-5);
+    padding: var(--s-3) var(--gutter);
+    border-bottom: var(--rule) solid var(--ink);
+  }
+
+  .site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+  }
+
+  .site-footer__top::after {
+    content: ' ^';
+    white-space: pre;
+  }
+
+  .site-footer__eot {
+    padding: var(--s-4) var(--gutter) var(--s-5);
+    text-align: center;
+  }
+</style>

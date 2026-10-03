@@ -1,0 +1,130 @@
+---
+/**
+ * Boxed project card: a framed halftone thumbnail with its file bar, then the
+ * details. The whole card is clickable through the title link.
+ */
+import Figure from './Figure.astro';
+import { pad, type Project } from '../lib/projects';
+import { url } from '../lib/url';
+
+interface Props {
+  project: Project;
+  /** 1-based position, shown as No.01. */
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+  priority?: boolean;
+}
+
+const { project, index, headingLevel: Heading = 'h3', priority = false } = Astro.props;
+const { title, year, role, summary, tags, cover, coverAlt, placeholder } = project.data;
+const href = url(`/work/${project.id}/`);
+const titleId = `card-${project.id}`;
+---
+
+<article class="card" aria-labelledby={titleId}>
+  <Figure
+    src={cover}
+    alt={coverAlt}
+    ratio="4 / 3"
+    sizes="(min-width: 64rem) 36vw, (min-width: 40rem) 60vw, 90vw"
+    widths={[400, 700, 1000, 1400]}
+    priority={priority}
+    class="card__fig"
+  />
+
+  <div class="card__body">
+    <p class="card__meta meta">
+      <span>No.{pad(index)}</span>
+      <span>{year}</span>
+      {placeholder && <span class="card__flag">Placeholder</span>}
+    </p>
+    <Heading class="card__title display" id={titleId}>
+      <a href={href}>{title}</a>
+    </Heading>
+    <p class="card__role meta">{role}</p>
+    <p class="card__summary">{summary}</p>
+    {
+      tags.length > 0 && (
+        <ul class="card__tags meta" role="list" aria-label="Tags">
+          {tags.map((tag) => (
+            <li>#{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: var(--rule) solid var(--ink);
+    background: var(--paper);
+  }
+
+  /* The focus ring goes round the whole card, since the whole card is the link. */
+  .card:has(.card__title a:focus-visible) {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  .card__title a:focus-visible {
+    outline: none;
+  }
+
+  /* The card border already frames the thumbnail. */
+  .card :global(.card__fig) {
+    border: 0;
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-3) var(--s-4);
+  }
+
+  .card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
+  .card__flag {
+    padding: 0 0.5em;
+    border: 1px solid var(--ink);
+  }
+
+  .card__title {
+    font-size: var(--fs-d3);
+    line-height: 1.05;
+  }
+
+  /* Stretch the title link over the whole card. */
+  .card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .card__role {
+    margin-top: calc(var(--s-1) * -1);
+  }
+
+  .card__summary {
+    max-width: 52ch;
+  }
+
+  .card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-3);
+    margin: auto 0 0;
+    padding: var(--s-2) 0 0;
+    list-style: none;
+  }
+</style>

@@ -1,0 +1,186 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Label from '../../components/Label.astro';
+import Cursor from '../../components/Cursor.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getProjects, pad, yearSpan } from '../../lib/projects';
+import { url } from '../../lib/url';
+
+const projects = await getProjects();
+---
+
+<BaseLayout title="Work" description={`Index of ${projects.length} projects, ${yearSpan(projects)}.`}>
+  <Section class="head" aria-labelledby="work-title">
+    <p class="head__path meta" aria-hidden="true">C:\DEV\WORK&gt; dir /o-d</p>
+
+    <h1 class="head__title" id="work-title"><Label size="xl">Work</Label></h1>
+
+    <p class="head__note">
+      {projects.length} projects, {yearSpan(projects)}.<br />Newest first.<Cursor />
+    </p>
+
+    <div class="listing">
+      <p class="listing__row listing__row--head meta" aria-hidden="true">
+        <span>No.</span><span>Year</span><span>Title</span><span>Role</span>
+      </p>
+      <ol class="listing__rows" role="list">
+        {
+          projects.map((project, i) => (
+            <li class="listing__row">
+              <span class="listing__no meta" aria-hidden="true">
+                {pad(i + 1)}
+              </span>
+              <span class="listing__year">
+                <span class="sr-only">Year: </span>
+                {project.data.year}
+              </span>
+              <a class="listing__title" href={url(`/work/${project.id}/`)}>
+                {project.data.title}
+              </a>
+              <span class="listing__role">
+                <span class="sr-only">Role: </span>
+                {project.data.role}
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </Section>
+
+  <Section tone="white" class="grid-wrap" aria-label="Projects">
+    <ol class="cards" role="list">
+      {
+        projects.map((project, i) => (
+          <li>
+            <ProjectCard project={project} index={i + 1} headingLevel="h2" />
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+</BaseLayout>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--s-3);
+    row-gap: var(--s-5);
+    padding: var(--s-6) var(--gutter) var(--s-7);
+  }
+
+  .head__path {
+    grid-column: 2 / span 6;
+    justify-self: start;
+  }
+
+  .head__title {
+    grid-column: 2 / -1;
+  }
+
+  .head__note {
+    grid-column: 7 / span 5;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .listing {
+    grid-column: 2 / span 10;
+    margin-top: var(--s-4);
+    padding: var(--s-3);
+    border: var(--rule) solid var(--ink);
+  }
+
+  .listing__rows {
+    display: grid;
+  }
+
+  .listing__row {
+    display: grid;
+    grid-template-columns: 4ch 6ch minmax(0, 1.3fr) minmax(0, 1fr);
+    column-gap: var(--s-4);
+    align-items: baseline;
+    padding: var(--s-2) 0;
+  }
+
+  .listing__row + .listing__row {
+    border-top: 1px dashed var(--ink);
+  }
+
+  .listing__row--head {
+    padding-top: 0;
+    border-bottom: var(--rule) solid var(--ink);
+  }
+
+  .listing__title {
+    font-weight: 700;
+    justify-self: start;
+  }
+
+  .listing__title::before {
+    content: '/';
+    white-space: pre;
+  }
+
+  @media (max-width: 47.99rem) {
+    .head__path,
+    .head__title,
+    .head__note,
+    .listing {
+      grid-column: 1 / -1;
+    }
+
+    .head__note {
+      margin-left: var(--s-6);
+    }
+
+    .listing__row {
+      grid-template-columns: 4ch minmax(0, 1fr);
+      row-gap: 0;
+    }
+
+    .listing__row--head {
+      display: none;
+    }
+
+    .listing__year {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .listing__title,
+    .listing__role {
+      grid-column: 2;
+    }
+
+    .listing__row + .listing__row {
+      border-top: 1px dashed var(--ink);
+    }
+
+    .listing__rows .listing__row:first-child {
+      border-top: 0;
+    }
+  }
+
+  .grid-wrap {
+    padding: var(--s-7) var(--gutter) var(--s-8);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    align-items: start;
+    gap: var(--s-7) var(--s-5);
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  /* Stagger every other card for a looser, pinned-up rhythm. */
+  @media (min-width: 48rem) {
+    .cards > li:nth-child(even) {
+      margin-top: var(--s-6);
+    }
+  }
+</style>

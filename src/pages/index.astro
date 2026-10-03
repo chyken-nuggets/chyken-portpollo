@@ -1,0 +1,317 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import TypedText from '../components/TypedText.astro';
+import Logo from '../components/Logo.astro';
+import Label from '../components/Label.astro';
+import Cursor from '../components/Cursor.astro';
+import Figure from '../components/Figure.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { site } from '../data/site';
+import { getFeatured, getProjects, yearSpan } from '../lib/projects';
+import { url } from '../lib/url';
+
+import portrait from '../assets/halftone/portrait.png';
+
+const all = await getProjects();
+const featured = await getFeatured(4);
+---
+
+<BaseLayout description={`${site.name}: ${site.role}. ${site.bio.replace(/\n/g, ' ')}`}>
+  <!-- 01 / The blue screen: calm, sparse, typed. -->
+  <Section class="boot" aria-labelledby="boot-title">
+    <TypedText
+      class="boot__intro"
+      lines={[
+        'hello, world.',
+        `${site.role}`,
+        `based in ${site.location}.`,
+        '',
+        `${all.length} projects on file, ${yearSpan(all)}.`,
+      ]}
+    />
+
+    <div class="boot__emblem">
+      <Logo decorative />
+    </div>
+
+    <TypedText class="boot__note" align="right" cursor lines={[site.availability, 'scroll down for selected work']} />
+
+    <!-- Not shown, but keeps the name as the page heading for screen readers and search. -->
+    <h1 class="sr-only" id="boot-title">{site.name}</h1>
+  </Section>
+
+  <!-- 02 / Introduction: a plain bordered table, web 1.0 style. -->
+  <Section class="intro" aria-labelledby="intro-title">
+    <h2 class="sr-only" id="intro-title">Nice to meet you</h2>
+
+    <div class="intro__table">
+      <Figure
+        class="intro__fig"
+        src={portrait}
+        alt="Colour halftone photo of Dennis in a fluffy husky-ear hat, round glasses and a denim jacket, looking off to the side at night."
+        caption="Fig. 01: Dennis Ezekiel Vidar"
+        sizes="(min-width: 64rem) 32vw, 90vw"
+      />
+      <div class="intro__cell">
+        <p class="lead bio">{site.bio}</p>
+        <ul class="list-term">
+          <li><a href={url('/about/')}>About me</a></li>
+          <li><a href={url('/work/')}>All work</a></li>
+          <li><a href={url('/contact/')}>Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <!-- 03 / Selected work on flipped paper. -->
+  <Section tone="white" class="work" aria-labelledby="work-title">
+    <div class="work__head">
+      <h2 id="work-title"><Label size="l">Selected work</Label></h2>
+      <p class="meta">
+        {featured.length} of {all.length} projects / {yearSpan(featured)}
+      </p>
+      <p><a class="link-arrow" href={url('/work/')}>Full index</a></p>
+    </div>
+
+    <ol class="work__list" role="list">
+      {
+        featured.map((project, i) => (
+          <li class="work__item">
+            <ProjectCard project={project} index={i + 1} />
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <!-- 04 / Sign-off. -->
+  <Section class="hello" aria-labelledby="hello-title">
+    <p class="hello__prompt">Got a project, a question,<br />or a link to swap?</p>
+    <h2 class="hello__title" id="hello-title"><Label size="xl">Say hello</Label></h2>
+    <p class="hello__mail lead">
+      <a href={`mailto:${site.email}`}>{site.email}</a><Cursor />
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------------ 01 boot -- */
+
+  .boot {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto minmax(var(--s-5), 1fr) auto minmax(var(--s-6), 1fr) auto;
+    column-gap: var(--s-3);
+    min-height: calc(100svh - 3rem);
+    padding: clamp(3rem, 10vh, 7rem) var(--gutter) clamp(2.5rem, 8vh, 5rem);
+  }
+
+  .boot :global(.boot__intro) {
+    grid-column: 2 / span 6;
+    grid-row: 1;
+    justify-self: start;
+    max-width: 44ch;
+  }
+
+  .boot__emblem {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: center;
+    width: clamp(8.5rem, 13vw, 12rem);
+  }
+
+  /* Bottom row: the note rests at the foot of the screen like a status line. */
+  .boot :global(.boot__note) {
+    grid-column: 8 / span 4;
+    grid-row: 5;
+    align-self: end;
+    justify-self: end;
+    max-width: 36ch;
+  }
+
+  /* Tablet: a wider column so the note doesn't wrap into a narrow strip. */
+  @media (min-width: 48rem) and (max-width: 63.99rem) {
+    .boot :global(.boot__note) {
+      grid-column: 7 / -1;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .boot {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: auto minmax(var(--s-5), 1fr) auto minmax(var(--s-5), 1fr) auto;
+      padding-top: var(--s-6);
+    }
+
+    .boot :global(.boot__intro) {
+      grid-column: 1 / -1;
+      margin-right: var(--s-6);
+    }
+
+    .boot__emblem {
+      width: clamp(7rem, 38vw, 9rem);
+    }
+
+    .boot :global(.boot__note) {
+      grid-column: 2 / -1;
+    }
+  }
+
+  /* ----------------------------------------------------------- 02 intro -- */
+
+  .intro {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--s-3);
+    row-gap: var(--s-5);
+    padding: var(--s-7) var(--gutter);
+  }
+
+  /* An old-school bordered table: outer border, cell spacing, bordered cells. */
+  .intro__table {
+    grid-column: 2 / span 10;
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: var(--s-2);
+    padding: var(--s-2);
+    border: var(--rule) solid var(--ink);
+  }
+
+  .intro__cell {
+    display: grid;
+    align-content: start;
+    gap: var(--s-4);
+    padding: var(--s-4);
+    border: var(--rule) solid var(--ink);
+  }
+
+  .intro__cell .lead {
+    max-width: 36ch;
+  }
+
+  @media (max-width: 47.99rem) {
+    .intro__table {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .intro__cell {
+      padding: var(--s-3);
+    }
+  }
+
+  /* ------------------------------------------------------------ 03 work -- */
+
+  .work {
+    padding: var(--s-7) var(--gutter) var(--s-8);
+  }
+
+  .work__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-3) var(--s-5);
+    max-width: var(--max);
+    margin: 0 auto var(--s-6);
+  }
+
+  .work__list {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    column-gap: var(--s-4);
+    row-gap: var(--s-7);
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .work__item:nth-child(4n + 1) {
+    grid-column: 1 / span 6;
+  }
+
+  .work__item:nth-child(4n + 2) {
+    grid-column: 8 / span 5;
+    margin-top: var(--s-8);
+  }
+
+  .work__item:nth-child(4n + 3) {
+    grid-column: 2 / span 5;
+  }
+
+  .work__item:nth-child(4n + 4) {
+    grid-column: 7 / span 6;
+    margin-top: var(--s-6);
+  }
+
+  @media (max-width: 63.99rem) {
+    .work__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: var(--s-6);
+    }
+
+    .work__item:nth-child(n) {
+      grid-column: auto;
+      margin-top: 0;
+    }
+
+    .work__item:nth-child(even) {
+      margin-top: var(--s-7);
+    }
+  }
+
+  @media (max-width: 39.99rem) {
+    .work__list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .work__item:nth-child(odd) {
+      margin-right: 9%;
+    }
+
+    .work__item:nth-child(even) {
+      margin-top: 0;
+      margin-left: 9%;
+    }
+  }
+
+  /* ----------------------------------------------------------- 04 hello -- */
+
+  .hello {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--s-3);
+    row-gap: var(--s-4);
+    padding: var(--s-7) var(--gutter) var(--s-7);
+  }
+
+  .hello__prompt {
+    grid-column: 2 / span 6;
+  }
+
+  .hello__title {
+    grid-column: 3 / -1;
+    margin-top: var(--s-4);
+  }
+
+  .hello__mail {
+    grid-column: 6 / -1;
+    justify-self: end;
+    margin-top: var(--s-5);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 47.99rem) {
+    .hello__prompt {
+      grid-column: 1 / -1;
+    }
+
+    .hello__title {
+      grid-column: 1 / -1;
+    }
+
+    .hello__mail {
+      grid-column: 2 / -1;
+    }
+  }
+</style>

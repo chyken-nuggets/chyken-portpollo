@@ -1,0 +1,105 @@
+---
+/**
+ * A halftone in a plain web 1.0 frame: a bordered blue box with cell padding
+ * around the image, and a directory-listing bar underneath:
+ *
+ *   [IMG] portrait.png                     1600x2000
+ *
+ * The figure is always blue paper (white/duo halftones need it), so it reads
+ * the same on blue and white sections. Images are never tilted or clipped;
+ * cut-outs keep their ragged dotted edges inside the frame.
+ */
+import type { ImageMetadata } from 'astro';
+import HalftoneImage from './HalftoneImage.astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** Visible caption under the file bar (also the accessible caption). */
+  caption?: string;
+  /** File name shown in the bar. Defaults to the image's own name. */
+  file?: string;
+  /** Fixed frame shape, e.g. "4 / 3"; the image is fitted inside it. */
+  ratio?: string;
+  sizes?: string;
+  widths?: number[];
+  priority?: boolean;
+  class?: string;
+}
+
+const { src, alt, caption, ratio, sizes, widths, priority, class: className } = Astro.props;
+
+// "/_astro/portrait.Cwj80Syf.png" (build) or "/@fs/.../portrait.png?..." (dev) -> "portrait.png"
+const file =
+  Astro.props.file ??
+  decodeURIComponent(src.src.split('?')[0].split('/').pop() ?? '').replace(/\.[\w-]{8}(?=\.\w+$)/, '');
+---
+
+<figure class:list={['fig', 'paper-blue', { 'fig--fit': ratio }, className]}>
+  <div class="fig__frame" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
+    <HalftoneImage src={src} alt={alt} sizes={sizes} widths={widths} priority={priority} class="fig__img" />
+  </div>
+  <div class="fig__bar" aria-hidden="true">
+    <span class="fig__file">[IMG] {file}</span>
+    <span>{src.width}x{src.height}</span>
+  </div>
+  {caption && <figcaption class="fig__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .fig {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    border: var(--rule) solid var(--ink);
+  }
+
+  /* Cell padding around the image. */
+  .fig__frame {
+    position: relative;
+    padding: var(--s-3);
+  }
+
+  .fig :global(.fig__img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    border: 0;
+    background: none;
+  }
+
+  /* Fixed-shape frames fit the image inside the padded box. */
+  .fig--fit :global(.fig__img) {
+    position: absolute;
+    inset: var(--s-3);
+    width: calc(100% - 2 * var(--s-3));
+    height: calc(100% - 2 * var(--s-3));
+    object-fit: contain;
+  }
+
+  .fig__bar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: var(--s-1) var(--s-2);
+    border-top: var(--rule) solid var(--ink);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-mono);
+    white-space: nowrap;
+  }
+
+  .fig__file {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fig__caption {
+    margin: 0;
+    padding: var(--s-2);
+    border-top: 1px dashed var(--ink);
+    font-size: var(--fs-small);
+    letter-spacing: var(--track-mono);
+    text-transform: none;
+  }
+</style>

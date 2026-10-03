@@ -1,0 +1,29 @@
+---
+/**
+ * A full-bleed surface. Blue paper + white ink by default; `tone="white"`
+ * flips it.
+ */
+import type { HTMLTag } from 'astro/types';
+
+interface Props {
+  as?: HTMLTag;
+  tone?: 'blue' | 'white';
+  class?: string;
+  id?: string;
+  'aria-labelledby'?: string;
+  'aria-label'?: string;
+}
+
+const { as: Tag = 'section', tone = 'blue', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['section', `paper-${tone}`, className]} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .section {
+    position: relative;
+    overflow-x: clip;
+  }
+</style>

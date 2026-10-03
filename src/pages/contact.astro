@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Label from '../components/Label.astro';
+import Cursor from '../components/Cursor.astro';
+import { site } from '../data/site';
+
+// Prefer to wrap a long address just before the @ on narrow screens.
+const [mailUser, mailDomain] = site.email.split('@');
+---
+
+<BaseLayout title="Contact" description={`Get in touch with ${site.name}.`}>
+  <Section class="contact" aria-labelledby="contact-title">
+    <p class="contact__prompt meta" aria-hidden="true">C:\DEV&gt; contact /all</p>
+
+    <h1 class="contact__title" id="contact-title"><Label size="xl">Contact</Label></h1>
+
+    <div class="contact__lines">
+      <dl class="channels">
+        <div>
+          <dt>Mail</dt>
+          <dd><a href={`mailto:${site.email}`}>{mailUser}<wbr />@{mailDomain}</a></dd>
+        </div>
+        {
+          site.socials.map((s) => (
+            <div>
+              <dt>{s.label}</dt>
+              <dd>
+                <a href={s.url} rel="me noopener">
+                  {s.handle}
+                </a>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <p class="contact__status">
+      {site.availability}<br />Replies within a few days.<Cursor />
+    </p>
+  </Section>
+</BaseLayout>
+
+<style>
+  /* The page fits one screen: <main> becomes a column, and the section takes
+     exactly the space between the header and footer instead of a full
+     screen of its own. */
+  :global(main:has(> .contact)) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contact {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    /* Prompt and title sit at the top, in the same spot as on Work and About.
+       Flexible rows centre the links in the space below, and the status note
+       stays pinned to the bottom row. */
+    grid-template-rows: auto auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    column-gap: var(--s-3);
+    /* No row gap: the empty spacer rows would still cost a gap each. Spacing
+       between the blocks comes from margins instead. */
+    row-gap: 0;
+    padding: var(--s-6) var(--gutter) var(--s-5);
+  }
+
+  .contact__prompt {
+    grid-column: 2 / span 6;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  /* 40px under the prompt: the same as Work and About. */
+  .contact__title {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    margin-top: var(--s-5);
+  }
+
+  .contact__lines {
+    grid-column: 2 / span 6;
+    grid-row: 4;
+    margin-top: var(--s-4);
+    justify-self: start;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  /* One grid for all rows: the label column is as wide as the longest label,
+     so every link lines up and nothing collides. */
+  .channels {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: var(--s-4);
+    row-gap: var(--s-2);
+  }
+
+  .channels div {
+    display: contents;
+  }
+
+  .channels dt {
+    text-transform: lowercase;
+  }
+
+  .channels dt::before {
+    content: '> ';
+    white-space: pre;
+  }
+
+  .channels dd {
+    overflow-wrap: anywhere;
+  }
+
+  .contact__status {
+    grid-column: 8 / span 4;
+    grid-row: 6;
+    margin-top: var(--s-4);
+    align-self: end;
+    justify-self: end;
+    text-align: right;
+  }
+
+  @media (max-width: 47.99rem) {
+    .contact {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .contact__prompt,
+    .contact__title,
+    .contact__lines {
+      grid-column: 1 / -1;
+    }
+
+    /* Label and link stay side by side: still fits, and keeps the page short. */
+    .channels {
+      column-gap: var(--s-3);
+    }
+
+    /* Full width (still right-aligned) so it wraps onto fewer lines. */
+    .contact__status {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Short screens (small phones, landscape laptops): tighter spacing so the
+     whole page still fits without scrolling. */
+  @media (max-height: 800px) {
+    .contact {
+      padding-bottom: var(--s-4);
+    }
+
+    .contact__lines,
+    .contact__status {
+      margin-top: var(--s-3);
+    }
+
+    .contact__lines {
+      gap: var(--s-2);
+    }
+
+    .channels {
+      row-gap: var(--s-1);
+    }
+  }
+
+  /* Short phones: the prompt and title keep their place, so the space comes
+     from the gaps below them. */
+  @media (max-width: 47.99rem) and (max-height: 800px) {
+    .contact {
+      padding-bottom: var(--s-3);
+    }
+
+    .contact__lines,
+    .contact__status {
+      margin-top: var(--s-2);
+    }
+  }
+</style>

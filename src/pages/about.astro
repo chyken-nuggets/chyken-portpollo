@@ -1,0 +1,263 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Label from '../components/Label.astro';
+import Cursor from '../components/Cursor.astro';
+import Figure from '../components/Figure.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+import portrait from '../assets/halftone/portrait.png';
+
+const specs = [
+  { key: 'Name', value: site.name },
+  { key: 'Role', value: site.role },
+  { key: 'Based', value: site.location },
+  { key: 'Status', value: site.availability },
+  { key: 'Tools', value: site.about.tools.join(', ') },
+  { key: 'Speaks', value: site.about.languages.join(', ') },
+];
+---
+
+<BaseLayout title="About" description={`${site.name}: ${site.bio.replace(/\n/g, ' ')}`}>
+  <Section class="a-head" aria-labelledby="about-title">
+    <p class="a-head__prompt meta" aria-hidden="true">C:\DEV&gt; whoami</p>
+
+    <h1 class="a-head__title" id="about-title"><Label size="xl">About</Label></h1>
+
+    <div class="a-head__portrait">
+      <Figure
+        src={portrait}
+        alt="Colour halftone photo of Dennis in a fluffy husky-ear hat, round glasses and a denim jacket, looking off to the side at night."
+        caption="Dennis Ezekiel Vidar"
+        priority
+        sizes="(min-width: 64rem) 30vw, 80vw"
+      />
+    </div>
+
+    <p class="a-head__bio lead bio">{site.bio}<Cursor /></p>
+  </Section>
+
+  <Section tone="white" class="a-body">
+    <section class="sysinfo box" aria-labelledby="sysinfo-title">
+      <h2 class="sysinfo__title meta" id="sysinfo-title">System information</h2>
+      <dl class="sysinfo__list">
+        {
+          specs.map(({ key, value }) => (
+            <div>
+              <dt>{key}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="block block--log" aria-labelledby="log-title">
+      <h2 id="log-title"><Label size="m">Log</Label></h2>
+      <ol class="log" role="list">
+        {
+          site.about.log.map((entry) => (
+            <li>
+              <span class="log__year">{entry.year}</span>
+              <span>{entry.text}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="block block--caps" aria-labelledby="caps-title">
+      <h2 id="caps-title"><Label size="m">Capabilities</Label></h2>
+      <ul class="list-term">
+        {site.about.capabilities.map((item) => <li>{item}</li>)}
+      </ul>
+      <p class="block__cta"><a class="link-arrow" href={url('/contact/')}>Start a conversation</a></p>
+    </section>
+  </Section>
+</BaseLayout>
+
+<style>
+  .a-head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto 1fr;
+    column-gap: var(--s-3);
+    row-gap: var(--s-4);
+    padding: var(--s-6) var(--gutter) var(--s-7);
+  }
+
+  .a-head__prompt {
+    grid-column: 2 / span 6;
+    justify-self: start;
+  }
+
+  .a-head__title {
+    grid-column: 2 / span 6;
+    grid-row: 2;
+    /* With the row gap, 40px under the prompt: the same as Work and Contact. */
+    margin-top: var(--s-3);
+  }
+
+  .a-head__portrait {
+    grid-column: 8 / span 4;
+    grid-row: 1 / span 3;
+    align-self: center;
+  }
+
+  .a-head__bio {
+    grid-column: 3 / span 5;
+    grid-row: 3;
+    align-self: end;
+    max-width: 38ch;
+    margin-top: var(--s-6);
+  }
+
+  @media (max-width: 47.99rem) {
+    .a-head {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: none;
+    }
+
+    .a-head__prompt {
+      grid-column: 1 / -1;
+    }
+
+    .a-head__title {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    .a-head__portrait {
+      grid-column: 2 / -1;
+      grid-row: auto;
+      margin-block: var(--s-4);
+    }
+
+    .a-head__bio {
+      grid-column: 1 / span 5;
+      grid-row: auto;
+      margin-top: 0;
+    }
+  }
+
+  .a-body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--s-4);
+    row-gap: var(--s-6);
+    padding: var(--s-7) var(--gutter) var(--s-8);
+  }
+
+  /* Spans the Log and Capabilities rows, so it is exactly as tall as both. */
+  .sysinfo {
+    grid-column: 1 / span 7;
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    padding: var(--s-4);
+  }
+
+  .sysinfo__title {
+    margin-bottom: var(--s-3);
+    padding-bottom: var(--s-2);
+    border-bottom: var(--rule) solid var(--ink);
+    font-weight: 700;
+  }
+
+  /* The rows share the box's height evenly, each centred between its rules. */
+  .sysinfo__list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sysinfo__list div {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 8ch minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s-3);
+    padding-block: var(--s-2);
+  }
+
+  .sysinfo__list div + div {
+    border-top: 1px dashed var(--ink);
+  }
+
+  .sysinfo__list dt {
+    text-transform: uppercase;
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    padding-top: 0.2em;
+  }
+
+  .sysinfo__list dt::after {
+    content: ':';
+  }
+
+  .block {
+    display: grid;
+    align-content: start;
+    gap: var(--s-4);
+  }
+
+  /* Log and Capabilities share the right-hand column. */
+  .block--log {
+    grid-column: 9 / -1;
+    grid-row: 1;
+  }
+
+  .block--caps {
+    grid-column: 9 / -1;
+    grid-row: 2;
+  }
+
+  .log {
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .log li {
+    display: grid;
+    grid-template-columns: 6ch 1fr;
+    gap: var(--s-3);
+  }
+
+  .log__year {
+    font-weight: 700;
+  }
+
+  .block__cta {
+    margin-top: var(--s-3);
+  }
+
+  @media (max-width: 63.99rem) {
+    .sysinfo,
+    .block--log,
+    .block--caps {
+      grid-column: 1 / -1;
+      grid-row: auto;
+      margin-top: 0;
+    }
+
+    .block--log {
+      margin-left: var(--s-6);
+    }
+  }
+
+  @media (max-width: 39.99rem) {
+    .block--log {
+      margin-left: var(--s-4);
+    }
+
+    .sysinfo {
+      padding: var(--s-3);
+    }
+
+    .sysinfo__list div {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

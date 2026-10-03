@@ -1,0 +1,181 @@
+---
+/**
+ * Lines that type out one by one behind a block cursor.
+ *
+ * The complete text is in the HTML from the start; the script only changes
+ * how it is revealed. Screen readers always get the full text, and with
+ * reduced motion (or no JS) everything is simply shown.
+ *
+ * Every TypedText on a page types in document order, one after another.
+ * Any key, click, scroll or touch finishes the animation instantly.
+ */
+import Cursor from './Cursor.astro';
+
+interface Props {
+  /** One entry per line; '' makes a blank line. */
+  lines: string[];
+  /** Leave a blinking block cursor after the last line. */
+  cursor?: boolean;
+  align?: 'left' | 'right';
+  class?: string;
+}
+
+const { lines, cursor = false, align = 'left', class: className } = Astro.props;
+---
+
+<p class:list={['typed', `typed--${align}`, className]} data-typed>
+  {
+    lines.map((line, i) => (
+      <>
+        {line !== '' && (
+          <span class="typed__line" data-typed-line>
+            {line}
+          </span>
+        )}
+        {i < lines.length - 1 && <br />}
+      </>
+    ))
+  }
+  {cursor && <Cursor class="typed__cursor" />}
+</p>
+
+<style>
+  .typed--right {
+    text-align: right;
+  }
+
+  /* The closing cursor takes no layout width, so it never wraps onto a line of
+     its own; it hangs into the block's padding instead. */
+  .typed :global(.typed__cursor) {
+    margin-right: calc(-0.62em - 0.2ch);
+  }
+
+  /* Before the script runs (html.is-typing is set by an inline script in <head>). */
+  :global(html.is-typing) [data-typed] {
+    opacity: 0;
+    /* Failsafe: if the script never runs, show the text anyway. */
+    animation: typed-failsafe 0s 3s forwards;
+  }
+
+  [data-typed][data-typed-state='pending'] {
+    opacity: 0;
+  }
+
+  [data-typed-state='pending'] :global(.typed__cursor),
+  [data-typed-state='running'] :global(.typed__cursor) {
+    display: none;
+  }
+
+  .typed :global(.typed__ghost) {
+    visibility: hidden;
+  }
+
+  .typed :global(.typed__caret) {
+    display: none;
+  }
+
+  .typed :global(.is-active .typed__caret) {
+    display: inline-block;
+    position: relative;
+    width: 0;
+    height: 1.2em;
+    vertical-align: -0.24em;
+  }
+
+  /* Zero-width anchor, so the caret sits over the next cell without reflowing. */
+  .typed :global(.is-active .typed__caret)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0.1ch;
+    width: 0.62em;
+    height: 100%;
+    background: currentColor;
+  }
+
+  @keyframes typed-failsafe {
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  const SPEED = 16; // ms per character
+  const LINE_PAUSE = 150;
+  const BLOCK_PAUSE = 320;
+  const START_DELAY = 250;
+
+  interface Line {
+    el: HTMLElement;
+    text: string;
+    shown: HTMLSpanElement;
+    ghost: HTMLSpanElement;
+  }
+
+  const root = document.documentElement;
+  const blocks = Array.from(document.querySelectorAll<HTMLElement>('[data-typed]'));
+  const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const span = (className?: string, text = '') => {
+    const el = document.createElement('span');
+    if (className) el.className = className;
+    el.textContent = text;
+    return el;
+  };
+
+  /** Split a line into: full text for screen readers + a visual copy we can reveal. */
+  function prepare(el: HTMLElement): Line {
+    const text = el.textContent ?? '';
+    const visual = span();
+    visual.setAttribute('aria-hidden', 'true');
+    const shown = span();
+    const ghost = span('typed__ghost', text);
+    visual.append(shown, span('typed__caret'), ghost);
+    el.replaceChildren(span('sr-only', text), visual);
+    return { el, text, shown, ghost };
+  }
+
+  async function play() {
+    const queue = blocks.map((block) => {
+      block.dataset.typedState = 'pending';
+      const lines = Array.from(block.querySelectorAll<HTMLElement>('[data-typed-line]')).map(prepare);
+      return { block, lines };
+    });
+    root.classList.remove('is-typing');
+
+    let skipped = false;
+    const skip = () => {
+      skipped = true;
+    };
+    for (const type of ['keydown', 'pointerdown', 'wheel', 'touchstart']) {
+      window.addEventListener(type, skip, { once: true, passive: true });
+    }
+
+    await sleep(START_DELAY);
+    for (const { block, lines } of queue) {
+      block.dataset.typedState = 'running';
+      for (const line of lines) {
+        line.el.classList.add('is-active');
+        for (let i = 1; i <= line.text.length && !skipped; i++) {
+          line.shown.textContent = line.text.slice(0, i);
+          line.ghost.textContent = line.text.slice(i);
+          await sleep(SPEED);
+        }
+        if (!skipped) await sleep(LINE_PAUSE);
+        line.el.classList.remove('is-active');
+        line.el.textContent = line.text; // back to plain text
+      }
+      block.dataset.typedState = 'done';
+      if (!skipped) await sleep(BLOCK_PAUSE);
+    }
+  }
+
+  if (blocks.length && motionOK && root.classList.contains('is-typing')) {
+    play();
+  } else {
+    root.classList.remove('is-typing');
+    for (const block of blocks) block.dataset.typedState = 'done';
+  }
+</script>

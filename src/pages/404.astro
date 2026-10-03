@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Label from '../components/Label.astro';
+import Cursor from '../components/Cursor.astro';
+import { url } from '../lib/url';
+---
+
+<BaseLayout title="404: Page not found" noindex>
+  <Section class="bsod" aria-labelledby="bsod-title">
+    <h1 class="bsod__title" id="bsod-title"><Label size="l">Error 404</Label></h1>
+
+    <div class="bsod__text">
+      <p>
+        A fatal exception 404 has occurred. The page you asked for could not be found. It may have been moved,
+        renamed, or it never existed.
+      </p>
+
+      <ul class="list-term">
+        <li>Go to the <a href={url('/')}>start screen</a> and try again.</li>
+        <li>Browse the <a href={url('/work/')}>work index</a> instead.</li>
+        <li>Check the address for typos. If a link on this site sent you here, <a href={url('/contact/')}>let me know</a>.</li>
+      </ul>
+
+      <p class="bsod__continue">Choose a link to continue<Cursor /></p>
+    </div>
+  </Section>
+</BaseLayout>
+
+<style>
+  .bsod {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--s-5);
+    min-height: calc(100svh - 3rem);
+    padding: var(--s-7) var(--gutter);
+  }
+
+  .bsod__text {
+    display: grid;
+    gap: var(--s-4);
+    max-width: 62ch;
+  }
+
+  .bsod__continue {
+    margin-top: var(--s-3);
+    text-align: center;
+  }
+</style>

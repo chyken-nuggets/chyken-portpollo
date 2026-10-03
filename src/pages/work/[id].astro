@@ -1,0 +1,283 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import Label from '../../components/Label.astro';
+import Figure from '../../components/Figure.astro';
+import { getProjects, type Project } from '../../lib/projects';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { id: project.id },
+    props: {
+      project,
+      prev: projects[i - 1] ?? null,
+      next: projects[i + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  project: Project;
+  prev: Project | null;
+  next: Project | null;
+}
+
+const { project, prev, next } = Astro.props;
+const { title, year, role, summary, tags, links, cover, coverAlt, placeholder } = project.data;
+const { Content } = await render(project);
+---
+
+<BaseLayout title={title} description={summary}>
+  <article>
+    <Section as="header" class="p-head" aria-labelledby="project-title">
+      <p class="p-head__crumbs meta">
+        <a href={url('/work/')}>Work</a> / <span aria-current="page">{project.id}</span>
+      </p>
+
+      <h1 class="p-head__title" id="project-title"><Label size="xl">{title}</Label></h1>
+
+      <p class="p-head__summary lead">{summary}</p>
+
+      <dl class="p-head__specs">
+        <div><dt class="meta">Year</dt><dd>{year}</dd></div>
+        <div><dt class="meta">Role</dt><dd>{role}</dd></div>
+        {
+          tags.length > 0 && (
+            <div>
+              <dt class="meta">Tags</dt>
+              <dd>{tags.map((t) => `#${t}`).join(' ')}</dd>
+            </div>
+          )
+        }
+        {
+          links.length > 0 && (
+            <div>
+              <dt class="meta">Links</dt>
+              <dd>
+                <ul class="p-head__links" role="list">
+                  {links.map((link) => (
+                    <li>
+                      <a href={link.url} rel="noopener">
+                        {link.label}
+                        <span class="sr-only"> (external)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )
+        }
+        {
+          placeholder && (
+            <div>
+              <dt class="meta">Status</dt>
+              <dd>Placeholder content</dd>
+            </div>
+          )
+        }
+      </dl>
+
+      <Figure class="p-head__cover" src={cover} alt={coverAlt} priority sizes="(min-width: 64rem) 45vw, 92vw" />
+    </Section>
+
+    <Section tone="white" class="p-body">
+      <div class="prose">
+        <Content />
+      </div>
+    </Section>
+
+    <Section as="nav" class="pager" aria-label="More projects">
+      {
+        prev ? (
+          <a class="pager__link" href={url(`/work/${prev.id}/`)} rel="prev">
+            <span class="meta">&lt;- Newer</span>
+            <span class="pager__title display">{prev.data.title}</span>
+          </a>
+        ) : (
+          <span class="pager__link pager__link--empty" aria-hidden="true">
+            <span class="meta">&lt;- Newer</span>
+            <span class="pager__title display">None</span>
+          </span>
+        )
+      }
+      <a class="pager__index" href={url('/work/')}>
+        All work
+      </a>
+      {
+        next ? (
+          <a class="pager__link pager__link--next" href={url(`/work/${next.id}/`)} rel="next">
+            <span class="meta">Older -&gt;</span>
+            <span class="pager__title display">{next.data.title}</span>
+          </a>
+        ) : (
+          <span class="pager__link pager__link--next pager__link--empty" aria-hidden="true">
+            <span class="meta">Older -&gt;</span>
+            <span class="pager__title display">None</span>
+          </span>
+        )
+      }
+    </Section>
+  </article>
+</BaseLayout>
+
+<style>
+  .p-head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--s-3);
+    row-gap: var(--s-5);
+    padding: var(--s-5) var(--gutter) var(--s-7);
+  }
+
+  .p-head__crumbs {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .p-head__title {
+    grid-column: 1 / span 8;
+    grid-row: 2;
+    margin-top: var(--s-4);
+  }
+
+  .p-head__summary {
+    grid-column: 2 / span 5;
+    grid-row: 3;
+    align-self: start;
+    max-width: 40ch;
+  }
+
+  .p-head__specs {
+    grid-column: 2 / span 4;
+    grid-row: 4;
+    align-self: start;
+    display: grid;
+    gap: var(--s-3);
+    padding-block: var(--s-3);
+    border-top: var(--rule) solid var(--ink);
+    border-bottom: var(--rule) solid var(--ink);
+  }
+
+  .p-head__specs div {
+    display: grid;
+    grid-template-columns: 7ch 1fr;
+    gap: var(--s-3);
+    align-items: baseline;
+  }
+
+  .p-head__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-3);
+  }
+
+  .p-head__links a::after {
+    content: ' ^';
+    display: inline-block;
+    transform: rotate(45deg);
+    white-space: pre;
+  }
+
+  .p-head :global(.p-head__cover) {
+    grid-column: 7 / -1;
+    grid-row: 3 / span 2;
+    align-self: start;
+  }
+
+  @media (max-width: 63.99rem) {
+    .p-head__title,
+    .p-head__summary,
+    .p-head__specs,
+    .p-head :global(.p-head__cover) {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    .p-head__summary {
+      margin-right: var(--s-6);
+    }
+
+    .p-head__specs {
+      margin-left: var(--s-5);
+    }
+
+    .p-head :global(.p-head__cover) {
+      margin-block: var(--s-4);
+    }
+  }
+
+  .p-body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    padding: var(--s-7) var(--gutter) var(--s-8);
+  }
+
+  .p-body .prose {
+    grid-column: 4 / span 7;
+  }
+
+  @media (max-width: 63.99rem) {
+    .p-body .prose {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    border-top: var(--rule) solid var(--ink);
+  }
+
+  .pager__link,
+  .pager__index {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--s-2);
+    padding: var(--s-4) var(--gutter);
+    text-decoration-thickness: 2px;
+  }
+
+  .pager__link--next {
+    align-items: flex-end;
+    text-align: right;
+    border-left: var(--rule) solid var(--ink);
+  }
+
+  .pager__index {
+    align-items: center;
+    border-left: var(--rule) solid var(--ink);
+    text-transform: uppercase;
+    font-size: var(--fs-small);
+    letter-spacing: var(--track-meta);
+  }
+
+  .pager__title {
+    font-size: var(--fs-d3);
+  }
+
+  .pager__link--empty .pager__title {
+    text-decoration: line-through;
+  }
+
+  .pager a:focus-visible {
+    outline-offset: -8px;
+  }
+
+  @media (max-width: 39.99rem) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pager__index {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      border-left: 0;
+      border-top: var(--rule) solid var(--ink);
+    }
+  }
+</style>

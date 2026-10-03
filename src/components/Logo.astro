@@ -1,0 +1,58 @@
+---
+/**
+ * The DEV emblem: initials in a solid oval inside an outlined ring.
+ * Drawn from paths (no font dependency) so it also works as the favicon.
+ * Ring and oval use the current ink; letters are cut out in the paper colour.
+ */
+interface Props {
+  class?: string;
+  /** Hide from assistive tech when the surrounding link already names it. */
+  decorative?: boolean;
+  title?: string;
+}
+
+const { class: className, decorative = false, title = 'DEV emblem' } = Astro.props;
+---
+
+<svg
+  class:list={['logo', className]}
+  viewBox="0 0 200 104"
+  xmlns="http://www.w3.org/2000/svg"
+  role={decorative ? undefined : 'img'}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-label={decorative ? undefined : title}
+  focusable="false"
+>
+  <ellipse class="logo__ring" cx="100" cy="52" rx="97" ry="49"></ellipse>
+  <ellipse class="logo__oval" cx="100" cy="52" rx="86" ry="39"></ellipse>
+  <g class="logo__letters">
+    <path
+      fill-rule="evenodd"
+      d="M44 34H70C76.6 34 80 37.4 80 44V60C80 66.6 76.6 70 70 70H44ZM52 42H68C70.8 42 72 43.2 72 46V58C72 60.8 70.8 62 68 62H52Z"
+    ></path>
+    <path d="M86 34H114V42H94V48H112V56H94V62H114V70H86Z"></path>
+    <path d="M119 34H128L138 60L148 34H157L143 70H133Z"></path>
+  </g>
+</svg>
+
+<style>
+  .logo {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .logo__ring {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 4;
+  }
+
+  .logo__oval {
+    fill: var(--ink);
+  }
+
+  .logo__letters {
+    fill: var(--paper);
+  }
+</style>
